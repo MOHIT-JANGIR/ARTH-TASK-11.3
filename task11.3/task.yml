@@ -1,0 +1,74 @@
+- hosts: task11.3
+  vars_files:
+  - var1.yml
+
+  tasks:
+  - name: "Create directory for dvd mount"
+    file:
+              state: directory
+              path: "{{ dvd_dir }}"
+
+  - name: "Mount the dvd to the directory"
+    mount:
+              src: "/dev/cdrom"
+              path: "{{ dvd_dir }}"
+              state: mounted
+              fstype: "iso9660"
+
+  - name: "Configure AppStream for yum"
+    yum_repository:
+              baseurl: "{{ dvd_dir }}/AppStream"
+              name: "dvd1"
+              description: "dvd1 for AppStream packages"
+              gpgcheck: no
+
+  - name: "Configure BaseOS for yum"
+    yum_repository:
+              baseurl: "{{ dvd_dir }}/BaseOS"
+              name: "dvd2"
+              description: "dvd2 for BaseOS packages"
+              gpgcheck: no
+
+  - name: "Install package"
+    package:
+              name: "httpd"
+              state: present
+    register: x
+
+  - name: "Create directory for web server"
+    file:
+              state: directory
+              path: "{{ doc_root }}"
+    register: y
+
+  - name: "Copy the configuration file"
+    template:
+              dest: "/etc/httpd/conf.d/lw.conf"
+              src: "lw.conf"
+    when: x.rc == 0
+    notify:
+              - Start service
+
+  - name: "Copy the web page"
+    copy:
+              dest: "{{ doc_root }}/index.html"
+              content: "this is latest web page\n"
+    when: y.failed == false
+            
+  - name: "start httpd service"
+    service:
+              name: "httpd"
+              state: started
+
+  - name: "Create firewall rule"
+    firewalld:
+              port: "{{ http_port }}/tcp"
+              state: enabled
+              permanent: yes
+              immediate: yes
+
+  handlers:
+  - name: Start service
+    service:
+              name: "httpd"
+              state: restarted
