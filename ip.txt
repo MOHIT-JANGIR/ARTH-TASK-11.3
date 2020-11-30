@@ -1,0 +1,10 @@
+[namenode]
+13.127.182.107 ansible_ssh_user=ec2-user ansible_ssh_private_key_file=/root/slave1.pem
+[datanode]
+52.66.245.177  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=/root/slave1.pem
+15.206.194.183  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=/root/slave1.pem
+[client]
+65.0.181.72   ansible_ssh_user=ec2-user ansible_ssh_private_key_file=/root/slave1.pem
+
+[task11.3]
+192.168.43.33  ansible_ssh_user=root ansible_ssh_pass=redhat
